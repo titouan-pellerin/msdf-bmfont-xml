@@ -19,7 +19,7 @@ npm install & npm run render
 ## Install as CLI
 
 ```bash
-npm install msdf-bmfont-xml -g
+npm i github:titouan-pellerin/msdf-bmfont-xml -g
 ```
 
 Then you just need to call `msdf-bmfont` from console to generate font file.
@@ -90,7 +90,7 @@ How about fire up some graphic editor and add some neat effect and lay on the ou
 ## Install as Module
 
 ```bash
-npm install msdf-bmfont-xml
+npm i github:titouan-pellerin/msdf-bmfont-xml
 ```
 
 ### Module usage Examples
@@ -157,6 +157,7 @@ Options:
     - `msdf` Multi-channel signed distance field
     - `sdf` Monochrome signed distance field
     - `psdf` monochrome signed pseudo-distance field
+    - `mtsdf` MSDF with SDF on alpha channel
 - `distanceRange` (Number)
   - the width of the range around the shape between the minimum and maximum representable signed distance in pixels, defaults to `3`
 - `roundDecimal` (Number)
