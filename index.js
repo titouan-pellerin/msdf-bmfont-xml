@@ -347,11 +347,7 @@ function generateImage (opt, callback) {
     const pixels = [];
     const channelCount = rawImageData.length / width / height;
 
-    if (!isNaN(channelCount)) {
-      console.error(command);
-      console.error(stdout);
-      return callback(new RangeError('msdfgen returned an image with an invalid length'));
-    }
+
     if (fieldType === 'msdf') {
       for (let i = 0; i < rawImageData.length; i += channelCount) {
         pixels.push(...rawImageData.slice(i, i + channelCount), 255); // add 255 as alpha every 3 elements
