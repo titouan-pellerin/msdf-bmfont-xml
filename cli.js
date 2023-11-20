@@ -25,7 +25,7 @@ args
   .option('-p, --texture-padding <n>', 'padding between glyphs', 1)
   .option('-b, --border <n>', 'space between glyphs textures & edge', 0)
   .option('-r, --distance-range <n>', 'distance range for SDF', 4)
-  .option('-t, --field-type <type>', 'msdf(default) | sdf | psdf', /^(msdf|sdf|psdf)$/i, 'msdf')
+  .option('-t, --field-type <type>', 'msdf(default) | sdf | psdf | mtsdf', /^(msdf|mtsdf|sdf|psdf)$/i, 'msdf')
   .option('-d, --round-decimal <digit>', 'rounded digits of the output font file.', 0)
   .option('-v, --vector', 'generate svg vector file for debuging', false)
   .option('-u, --reuse [file.cfg]', 'save/create config file for reusing settings', false)

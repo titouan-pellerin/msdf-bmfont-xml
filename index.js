@@ -37,7 +37,7 @@ module.exports = generateBMFont;
  *            textureWidth : Width of generated textures (default 512)
  *            textureHeight : Height of generated textures (default 512)
  *            distanceRange : distance range for computing signed distance field
- *            fieldType : "msdf"(default), "sdf", "psdf"
+ *            fieldType : "msdf"(default), "sdf", "psdf", "mtsdf"
  *            roundDecimal  : rounded digits of the output font file. (Defaut is null)
  *            smartSize : shrink atlas to the smallest possible square (Default: false)
  *            pot : atlas size shall be power of 2 (Default: false)
@@ -105,7 +105,7 @@ function generateBMFont (fontPath, opt, callback) {
   let charset = opt.charset = (typeof opt.charset === 'string' ? Array.from(opt.charset) : opt.charset) || reuse.charset || defaultCharset;
 
   // TODO: Validate options
-  if (fieldType !== 'msdf' && fieldType !== 'sdf' && fieldType !== 'psdf') {
+  if (fieldType !== 'msdf' && fieldType !== 'sdf' && fieldType !== 'psdf' && fieldType !== 'mtsdf') {
     throw new TypeError('fieldType must be one of msdf, sdf, or psdf');
   }
 
@@ -343,6 +343,7 @@ function generateImage (opt, callback) {
   let subproc = exec(command, (err, stdout, stderr) => {
     if (err) return callback(err);
     const rawImageData = stdout.match(/([0-9a-fA-F]+)/g).map(str => parseInt(str, 16)); // split on every number, parse from hex
+
     const pixels = [];
     const channelCount = rawImageData.length / width / height;
 
@@ -355,11 +356,17 @@ function generateImage (opt, callback) {
       for (let i = 0; i < rawImageData.length; i += channelCount) {
         pixels.push(...rawImageData.slice(i, i + channelCount), 255); // add 255 as alpha every 3 elements
       }
+    } else if(fieldType === "mtsdf") {
+      for (let i = 0; i < rawImageData.length; i += channelCount) {
+        pixels.push(...rawImageData.slice(i, i + channelCount));
+      }
     } else {
       for (let i = 0; i < rawImageData.length; i += channelCount) {
         pixels.push(rawImageData[i], rawImageData[i], rawImageData[i], rawImageData[i]); // make monochrome w/ alpha
       }
     }
+
+
     let imageData;
     if (isNaN(channelCount) || !rawImageData.some(x => x !== 0)) { // if character is blank
       readline.clearLine(process.stdout);
