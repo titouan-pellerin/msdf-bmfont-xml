@@ -347,7 +347,7 @@ function generateImage (opt, callback) {
     const pixels = [];
     const channelCount = rawImageData.length / width / height;
 
-    if (!isNaN(channelCount) && channelCount % 1 !== 0) {
+    if (!isNaN(channelCount)) {
       console.error(command);
       console.error(stdout);
       return callback(new RangeError('msdfgen returned an image with an invalid length'));
