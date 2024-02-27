@@ -1,16 +1,17 @@
-const utils = require('./lib/utils');
-const reshaper = require('arabic-persian-reshaper').ArabicShaper;
-const opentype = require('opentype.js');
-const exec = require('child_process').exec;
-const mapLimit = require('map-limit');
-const MaxRectsPacker = require('maxrects-packer').MaxRectsPacker;
-const path = require('path');
-const ProgressBar = require('cli-progress');
-const fs = require('fs');
-const buffer = require('buffer').Buffer;
-const Jimp = require('jimp');
-const readline = require('readline');
-const assert = require('assert');
+import ArabicPersianReshaper from 'arabic-persian-reshaper';
+const { ArabicShaper } = ArabicPersianReshaper;
+import opentype from 'opentype.js';
+import { exec } from 'child_process';
+import mapLimit from 'map-limit';
+import { MaxRectsPacker } from 'maxrects-packer';
+import path from 'path';
+import ProgressBar from 'cli-progress';
+import fs from 'fs';
+import { Buffer } from 'buffer';
+import Jimp from 'jimp';
+import readline from 'readline';
+import assert from 'assert';
+import { bufferToArrayBuffer, filterContours, roundAllValue, roundNumber, setTolerance, stringifyContours, valueQueue, stringify } from './lib/utils.js';
 
 const defaultCharset = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~".split('');
 const controlChars = ['\n', '\r', '\t'];
@@ -23,7 +24,7 @@ const binaryLookup = {
   linux_arm64: 'msdfgen.linux'
 };
 
-module.exports = generateBMFont;
+export default generateBMFont;
 
 /**
  * Creates a BMFont compatible bitmap font of signed distance fields from a font file
@@ -67,7 +68,7 @@ function generateBMFont (fontPath, opt, callback) {
 
   // Set fallback output path to font path
   let fontDir = typeof fontPath === 'string' ? path.dirname(fontPath) : '';
-  const binaryPath = path.join(__dirname, 'bin', process.platform, binName);
+  const binaryPath = path.join(import.meta.dirname, 'bin', process.platform, binName);
 
   // const reuse = (typeof opt.reuse === 'boolean' || typeof opt.reuse === 'undefined') ? {} : opt.reuse.opt;
   let reuse, cfg = {};
@@ -81,27 +82,27 @@ function generateBMFont (fontPath, opt, callback) {
       reuse = cfg.opt;
     }
   } else reuse = {};
-  const outputType = opt.outputType = utils.valueQueue([opt.outputType, reuse.outputType, "xml"]);
-  let filename = utils.valueQueue([opt.filename, reuse.filename]);
-  const distanceRange = opt.distanceRange = utils.valueQueue([opt.distanceRange, reuse.distanceRange, 4]);
-  const fontSize = opt.fontSize = utils.valueQueue([opt.fontSize, reuse.fontSize, 42]);
-  const fontSpacing = opt.fontSpacing = utils.valueQueue([opt.fontSpacing, reuse.fontSpacing, [0, 0]]);
+  const outputType = opt.outputType = valueQueue([opt.outputType, reuse.outputType, "xml"]);
+  let filename = valueQueue([opt.filename, reuse.filename]);
+  const distanceRange = opt.distanceRange = valueQueue([opt.distanceRange, reuse.distanceRange, 4]);
+  const fontSize = opt.fontSize = valueQueue([opt.fontSize, reuse.fontSize, 42]);
+  const fontSpacing = opt.fontSpacing = valueQueue([opt.fontSpacing, reuse.fontSpacing, [0, 0]]);
   const pad = distanceRange >> 1;
-  const fontPadding = opt.fontPadding = utils.valueQueue([opt.fontPadding, reuse.fontPadding, [pad, pad, pad, pad]]);
-  const textureWidth = opt.textureWidth = utils.valueQueue([opt.textureSize || reuse.textureSize, [512, 512]])[0];
-  const textureHeight = opt.textureHeight = utils.valueQueue([opt.textureSize || reuse.textureSize, [512, 512]])[1];
-  const texturePadding = opt.texturePadding = utils.valueQueue([opt.texturePadding, reuse.texturePadding, 1]);
-  const border = opt.border = utils.valueQueue([opt.border, reuse.border, 0]);
-  const fieldType = opt.fieldType = utils.valueQueue([opt.fieldType, reuse.fieldType, 'msdf']);
-  const roundDecimal = opt.roundDecimal = utils.valueQueue([opt.roundDecimal, reuse.roundDecimal]); // if no roudDecimal option, left null as-is
-  const smartSize = opt.smartSize = utils.valueQueue([opt.smartSize, reuse.smartSize, false]);
-  const pot = opt.pot = utils.valueQueue([opt.pot, reuse.pot, false]);
-  const square = opt.square = utils.valueQueue([opt.square, reuse.square, false]);
+  const fontPadding = opt.fontPadding = valueQueue([opt.fontPadding, reuse.fontPadding, [pad, pad, pad, pad]]);
+  const textureWidth = opt.textureWidth = valueQueue([opt.textureSize || reuse.textureSize, [512, 512]])[0];
+  const textureHeight = opt.textureHeight = valueQueue([opt.textureSize || reuse.textureSize, [512, 512]])[1];
+  const texturePadding = opt.texturePadding = valueQueue([opt.texturePadding, reuse.texturePadding, 1]);
+  const border = opt.border = valueQueue([opt.border, reuse.border, 0]);
+  const fieldType = opt.fieldType = valueQueue([opt.fieldType, reuse.fieldType, 'msdf']);
+  const roundDecimal = opt.roundDecimal = valueQueue([opt.roundDecimal, reuse.roundDecimal]); // if no roudDecimal option, left null as-is
+  const smartSize = opt.smartSize = valueQueue([opt.smartSize, reuse.smartSize, false]);
+  const pot = opt.pot = valueQueue([opt.pot, reuse.pot, false]);
+  const square = opt.square = valueQueue([opt.square, reuse.square, false]);
   const debug = opt.vector || false;
-  const tolerance = opt.tolerance = utils.valueQueue([opt.tolerance, reuse.tolerance, 0]);
-  const isRTL = opt.rtl = utils.valueQueue([opt.rtl, reuse.rtl, false]);
-  const allowRotation = opt.rot = utils.valueQueue([opt.rot, reuse.rot, false]);
-  if (isRTL) opt.charset = reshaper.convertArabic(opt.charset);
+  const tolerance = opt.tolerance = valueQueue([opt.tolerance, reuse.tolerance, 0]);
+  const isRTL = opt.rtl = valueQueue([opt.rtl, reuse.rtl, false]);
+  const allowRotation = opt.rot = valueQueue([opt.rot, reuse.rot, false]);
+  if (isRTL) opt.charset = ArabicShaper.convertArabic(opt.charset);
   let charset = opt.charset = (typeof opt.charset === 'string' ? Array.from(opt.charset) : opt.charset) || reuse.charset || defaultCharset;
 
   // TODO: Validate options
@@ -111,7 +112,7 @@ function generateBMFont (fontPath, opt, callback) {
 
   const font = typeof fontPath === 'string'
     ? opentype.loadSync(fontPath)
-    : opentype.parse(utils.bufferToArrayBuffer(fontPath));
+    : opentype.parse(bufferToArrayBuffer(fontPath));
 
   if (font.outlinesFormat !== 'truetype' && font.outlinesFormat !== 'cff') {
     throw new TypeError('must specify a truetype font (ttf, otf, woff)');
@@ -280,11 +281,12 @@ function generateBMFont (fontPath, opt, callback) {
       },
       kernings: kernings
     };
-    if(roundDecimal !== null) utils.roundAllValue(fontData, roundDecimal, true);
+    if(roundDecimal !== null) roundAllValue(fontData, roundDecimal, true);
     let fontFile = {};
     const ext = outputType === "json" ? `.json` : `.fnt`;
     fontFile.filename = path.join(fontDir, fontface + ext);
-    fontFile.data = utils.stringify(fontData, outputType);
+    console.log(fontData);
+    fontFile.data = stringify(fontData, outputType);
 
     // Store pages name and available packer freeRects in settings
     settings.pages = pages;
@@ -316,15 +318,15 @@ function generateImage (opt, callback) {
   contours.push(currentContour);
 
   if (tolerance != 0) {
-    utils.setTolerance(tolerance, tolerance * 10);
-    let numFiltered = utils.filterContours(contours);
+    setTolerance(tolerance, tolerance * 10);
+    let numFiltered = filterContours(contours);
     if (numFiltered && debug)
       console.log(`\n${char} removed ${numFiltered} small contour(s)`);
     // let numReversed = utils.alignClockwise(contours, false);
     // if (numReversed && debug)
     //   console.log(`${char} found ${numReversed}/${contours.length} reversed contour(s)`);
   }
-  let shapeDesc = utils.stringifyContours(contours);
+  let shapeDesc = stringifyContours(contours);
 
   if (contours.some(cont => cont.length === 1)) console.log('length is 1, failed to normalize glyph');
   const scale = fontSize / font.unitsPerEm;
@@ -335,8 +337,8 @@ function generateImage (opt, callback) {
   let xOffset = Math.round(-bBox.x1) + pad;
   let yOffset = Math.round(-bBox.y1) + pad;
   if (roundDecimal != null) {
-    xOffset = utils.roundNumber(xOffset, roundDecimal);
-    yOffset = utils.roundNumber(yOffset, roundDecimal);
+    xOffset = roundNumber(xOffset, roundDecimal);
+    yOffset = roundNumber(yOffset, roundDecimal);
   }
   let command = `"${binaryPath}" ${fieldType} -format text -stdout -size ${width} ${height} -translate ${xOffset} ${yOffset} -pxrange ${distanceRange} -stdin`;
 

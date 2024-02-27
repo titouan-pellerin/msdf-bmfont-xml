@@ -1,19 +1,14 @@
 #!/usr/bin/env node
-
-const pkg = require('./package.json');
-const generateBMFont = require('./index');
-const fs = require('fs');
-const path = require('path');
-const handlebars = require('handlebars');
-const args = require('commander');
-const updateNotifier = require('update-notifier');
-const utils = require('./lib/utils');
-
-updateNotifier({pkg}).notify();
+import args from 'commander'
+import handlebars from 'handlebars'
+import fs from 'node:fs'
+import path from 'node:path'
+import generateBMFont from './index.js'
+import { roundAllValue, valueQueue } from './lib/utils.js'
 
 let fontFile;
 args
-  .version('msdf-bmfont-xml v' + pkg.version)
+  .version('msdf-bmfont-xml v' + '2.7.0')
   .usage('[options] <font-file>')
   .arguments('<font_file>')
   .description('Creates a BMFont compatible bitmap font of signed distance fields from a font file')
@@ -42,7 +37,7 @@ args
 // Initialize options 
 //
 let opt = args.opts();
-utils.roundAllValue(opt); // Parse all number from string
+roundAllValue(opt); // Parse all number from string
 if (!fontFile) {
   console.error('Must specify font-file, use: \'msdf-bmfont -h\' for more infomation');
   process.exit(1);
@@ -58,16 +53,16 @@ const fontDir = path.dirname(fontFile);
 //
 opt.fontFile = fontFile;
 if (typeof opt.reuse === 'boolean') {
-  opt.filename = utils.valueQueue([opt.filename, path.join(fontDir, fontface)]);
-  opt.vector = utils.valueQueue([opt.vector, false]);
-  opt.reuse = utils.valueQueue([opt.reuse, false]);
-  opt.smartSize = utils.valueQueue([opt.smartSize, false]);
-  opt.pot = utils.valueQueue([opt.pot, false]);
-  opt.square = utils.valueQueue([opt.square, false]);
-  opt.rot = utils.valueQueue([opt.rot, false]);
-  opt.rtl = utils.valueQueue([opt.rtl, false]);
+  opt.filename = valueQueue([opt.filename, path.join(fontDir, fontface)]);
+  opt.vector = valueQueue([opt.vector, false]);
+  opt.reuse = valueQueue([opt.reuse, false]);
+  opt.smartSize = valueQueue([opt.smartSize, false]);
+  opt.pot = valueQueue([opt.pot, false]);
+  opt.square = valueQueue([opt.square, false]);
+  opt.rot = valueQueue([opt.rot, false]);
+  opt.rtl = valueQueue([opt.rtl, false]);
 } else {
-  opt.filename = utils.valueQueue([opt.filename, path.join("./", fontface)]);
+  opt.filename = valueQueue([opt.filename, path.join("./", fontface)]);
 }
 
 //

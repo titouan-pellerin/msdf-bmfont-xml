@@ -1,28 +1,28 @@
-const assert = require('assert');
-const path = require('path');
-const fs = require('fs');
+import assert from "node:assert";
+import fs from "node:fs";
+import path from "node:path";
 
-const generateBMFont = require('../');
+import generateBMFont from "../index.js";
 
-console.log('[test:memory] Running tests');
+console.log("[test:memory] Running tests");
 
-const fontPath = path.join(__dirname, '..', 'assets', 'fonts', 'DIN_CB.ttf');
+const fontPath = path.join(import.meta.dirname, "..", "assets", "fonts", "DIN_CB.ttf");
 const fontBuffer = fs.readFileSync(fontPath);
 
-console.log('[test:memory] Loaded font');
+console.log("[test:memory] Loaded font");
 
-generateBMFont(fontBuffer, {filename: 'test', outputType: 'json'}, (error, textures, fontFile) => {
-  assert.ok(!error, 'font generation failed');
+generateBMFont(fontBuffer, { filename: "test", outputType: "json" }, (error, textures, fontFile) => {
+    assert.ok(!error, "font generation failed");
 
-  const font = JSON.parse(fontFile.data);
-  const texture = textures[0];
+    const font = JSON.parse(fontFile.data);
+    const texture = textures[0];
 
-  assert.equal(fontFile.filename, 'test.json', 'incorrect font filename');
-  assert.equal(font.info.face, 'test', 'incorrect font face');
-  assert.deepEqual(font.pages, ['test.png'], 'incorrect font pages');
-  assert.equal(textures.length, 1, 'incorrect number of textures');
-  assert.equal(texture.filename, 'test', 'incorrect texture name');
-  assert.ok(texture.texture instanceof Buffer, 'missing texture buffer');
+    assert.equal(fontFile.filename, "test.json", "incorrect font filename");
+    assert.equal(font.info.face, "test", "incorrect font face");
+    assert.deepEqual(font.pages, ["test.png"], "incorrect font pages");
+    assert.equal(textures.length, 1, "incorrect number of textures");
+    assert.equal(texture.filename, "test", "incorrect texture name");
+    assert.ok(texture.texture instanceof Buffer, "missing texture buffer");
 
-  console.log('[test:memory] Tests passed');
+    console.log("[test:memory] Tests passed");
 });
