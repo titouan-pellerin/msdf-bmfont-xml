@@ -285,7 +285,6 @@ function generateBMFont (fontPath, opt, callback) {
     let fontFile = {};
     const ext = outputType === "json" ? `.json` : `.fnt`;
     fontFile.filename = path.join(fontDir, fontface + ext);
-    console.log(fontData);
     fontFile.data = stringify(fontData, outputType);
 
     // Store pages name and available packer freeRects in settings
